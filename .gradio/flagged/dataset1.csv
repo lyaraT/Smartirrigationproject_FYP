@@ -1,0 +1,53 @@
+Crop Type,Days Since Planting,Soil Moisture Sensor Value (Raw),Temperature (°C),Relative Humidity (%),Prediction Output,Crop Image,timestamp
+Wheat,14,169,8,19,"### 🌾 Prediction Result
+
+**Crop Type**: Wheat  
+**Crop Stage**: Germination  
+**Soil Moisture (%):** 4.76  
+**VPD:** 6.48  
+**Prediction:** 💦 Irrigation Required  
+🔒 **Confidence Score**: 69.95%
+
+---  
+
+🔍 Why this decision was made:
+
+1. Most influential factor: Soil Moisture (%)
+👉 Low soil moisture means roots may not get enough water.
+🔹 SHAP Contribution: increased irrigation probability by +1.94
+
+2. Second most influential factor: Crop Type
+👉 Some crops require less water or are drought-tolerant.
+🔹 SHAP Contribution: reduced irrigation probability by −0.72
+
+3. Third most influential factor: Temperature (°C)
+👉 Cool temperatures slow down water loss from the soil.
+🔹 SHAP Contribution: reduced irrigation probability by −0.23
+
+Note: Higher absolute SHAP values mean greater influence on the decision.",.gradio\flagged\Crop Image\d467989df29e0c98d076\image.webp,2025-08-14 16:31:06.303011
+Wheat,9,162,10,15,"### 🌾 Prediction Result
+
+**Crop Type**: Wheat  
+**Crop Stage**: Germination  
+**Soil Moisture (%):** 3.94  
+**VPD:** 8.50  
+**Prediction:** 💦 Irrigation Required  
+🔒 **Confidence Score**: 70.60%
+
+---  
+
+🔍 Why this decision was made:
+
+1. Most influential factor: Soil Moisture (%)
+👉 Low soil moisture means roots may not get enough water.
+🔹 SHAP Contribution: increased irrigation probability by +1.94
+
+2. Second most influential factor: Crop Type
+👉 Some crops require less water or are drought-tolerant.
+🔹 SHAP Contribution: reduced irrigation probability by −0.79
+
+3. Third most influential factor: Temperature (°C)
+👉 Cool temperatures slow down water loss from the soil.
+🔹 SHAP Contribution: reduced irrigation probability by −0.24
+
+Note: Higher absolute SHAP values mean greater influence on the decision.",.gradio\flagged\Crop Image\3106e1bcdc8a9898761f\image.webp,2025-08-14 20:55:32.351044
