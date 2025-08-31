@@ -5,7 +5,7 @@ import shap
 import matplotlib.pyplot as plt
 
 from preprocess import transform_features
-from shap_explain import explain_prediction  # ✅ Updated version used here
+from shap_explain import explain_prediction 
 
 # === Load model ===
 MODEL_DIR = "models"

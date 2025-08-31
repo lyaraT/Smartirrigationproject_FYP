@@ -35,9 +35,7 @@ scaler = joblib.load(SCALER_PATH)
 sm_min = joblib.load(SM_MIN_PATH)
 sm_max = joblib.load(SM_MAX_PATH)
 
-# ----------------------------
-# Helper functions (match training-time logic)
-# ----------------------------
+
 stage_mapping = {
     'Wheat':        [(0, 20, 'Germination'), (21, 60, 'Vegetative'), (61, 90, 'Reproductive'), (91, float('inf'), 'Maturity')],
     'Groundnuts':   [(0, 20, 'Germination'), (21, 40, 'Vegetative'), (41, 90, 'Reproductive'), (91, float('inf'), 'Maturity')],
@@ -73,16 +71,14 @@ def transform_features(crop_type, crop_days, soil_moisture, temperature, humidit
     feats_scaled = scaler.transform(feats)
     return feats_scaled, {"CropStage": crop_stage, "VPD": round(vpd, 2), "SoilMoisturePercent": round(soil_percent, 2)}
 
-# ----------------------------
-# Script entry
-# ----------------------------
+
 if __name__ == "__main__":
-    # Checks & setup
+    
     if not os.path.exists(DATA_PATH):  raise FileNotFoundError(f"Dataset not found at {DATA_PATH}")
     if not os.path.exists(MODEL_PATH): raise FileNotFoundError(f"Model not found at {MODEL_PATH}")
     os.makedirs(PLOTS_DIR, exist_ok=True)
 
-    # Load data & model
+
     df = pd.read_csv(DATA_PATH)
     model: XGBClassifier = joblib.load(MODEL_PATH)
 

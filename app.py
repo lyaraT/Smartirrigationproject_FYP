@@ -7,7 +7,7 @@ from PIL import Image
 from preprocess import transform_features
 from shap_explain import explain_prediction
 
-# ---------------- Models ----------------
+
 BASE_MODEL_PATH = os.path.join("models", "xgboost_model.pkl")
 CAL_MODEL_PATH  = os.path.join("models", "xgb_calibrated.pkl")
 
@@ -21,7 +21,7 @@ if os.path.exists(CAL_MODEL_PATH):
     except Exception as e:
         print("Warning: could not load calibrated model. Falling back to base proba. Error:", e)
 
-# ---- crop-specific max growth days ----
+
 CROP_MAX_DAYS = {
     "Wheat": 150, "Groundnuts": 150, "Garden Flowers": 120, "Maize": 120,
     "Paddy": 150, "Potato": 120, "Pulse": 120, "Sugarcane": 365, "Coffee": 365,
@@ -172,7 +172,7 @@ def update_days_slider(selected_crop, current_days):
 
 
 with gr.Blocks(theme=gr.themes.Default(primary_hue="green", secondary_hue="gray")) as demo:
-    # ---------- Global styling ----------
+    # Global styling 
     gr.HTML("""
     <style>
       .gradio-container {
