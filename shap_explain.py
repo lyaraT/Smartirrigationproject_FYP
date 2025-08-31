@@ -10,13 +10,79 @@ SCALER_PATH = os.path.join("models", "scaler.pkl")
 model = joblib.load(MODEL_PATH)
 scaler = joblib.load(SCALER_PATH)
 
+
+def _humanize_explanation(feature_name: str, direction: str, info: dict) -> str:
+    
+    crop = info.get("crop_type")
+    stage = info.get("CropStage")
+    sm = info.get("SoilMoisturePercent")
+    vpd = info.get("VPD")
+    temp = info.get("temperature")
+    rh = info.get("humidity")
+
+    if direction == "increased":
+        phrase = "makes irrigation more likely"
+    else:
+        phrase = "reduces the need for irrigation"
+
+    if feature_name == "Soil Moisture (%)":
+        if sm is not None:
+            return (
+                f"Soil moisture is about {sm:.1f}%. Under the present conditions, "
+                f"this {phrase}."
+            )
+        return f"Current soil moisture {phrase}."
+
+    if feature_name == "Crop Type":
+        if crop:
+            return (
+                f"Given the present conditions and the crop being {crop}, "
+                f"it {phrase}."
+            )
+        return f"The crop type {phrase} under the current conditions."
+
+    if feature_name == "Crop Stage":
+        if stage:
+            return (
+                f"Because the crop is in the {stage} stage under today’s conditions, "
+                f"it {phrase}."
+            )
+        return f"At this growth stage, the crop {phrase}."
+
+    if feature_name == "Temperature (°C)":
+        if temp is not None:
+            return (
+                f"Temperature is around {temp:.0f}°C. At this temperature, "
+                f"the crop’s water demand {phrase}."
+            )
+        return f"The current temperature {phrase}."
+
+    if feature_name == "Humidity (%)":
+        if rh is not None:
+            return (
+                f"Relative humidity is about {rh:.0f}%. Under these conditions, "
+                f"the crop’s water loss {phrase}."
+            )
+        return f"The current humidity {phrase}."
+
+    if feature_name == "VPD":
+        if vpd is not None:
+            return (
+                f"VPD is {vpd:.2f}. With this air dryness, crop water demand "
+                f"{phrase}."
+            )
+        return f"The air dryness (VPD) {phrase}."
+
+    if feature_name == "Days Since Planting":
+        return (
+            f"At this crop age, the growth stage water demand {phrase}."
+        )
+
+    return f"This factor {phrase} under the present conditions."
+
+
 def explain_prediction(input_scaled, feature_names, intermediates=None, return_text=False):
-    """
-    Returns:
-    - explanation_list: [(title, explanation, impact_str), ...] (top 3 only)
-    - plot_path: path to SHAP feature contribution bar plot
-    - conclusion: overall reasoning summary
-    """
+  
     explainer = shap.Explainer(model, feature_names=feature_names)
     shap_values = explainer(input_scaled)
     shap_vals = shap_values.values[0]
@@ -27,38 +93,8 @@ def explain_prediction(input_scaled, feature_names, intermediates=None, return_t
 
     explanations = []
 
-    def interpret_feature(name, direction):
-        explanation_map = {
-            "Crop Type": {
-                "increased": "This crop type generally requires more frequent irrigation for healthy growth.",
-                "reduced": "This crop type is drought-tolerant, meaning it can thrive with less frequent irrigation."
-            },
-            "VPD": {
-                "increased": "There is high vapour pressure deficit, meaning the air is dry and plants lose water faster.",
-                "reduced": "There is low vapour pressure deficit, meaning the air is humid and plants lose water slowly."
-            },
-            "Soil Moisture (%)": {
-                "increased": "There is low soil moisture, meaning roots may not be getting enough water to sustain growth.",
-                "reduced": "There is adequate soil moisture, meaning plants have enough available water in the root zone."
-            },
-            "Temperature (°C)": {
-                "increased": "There is high temperature, which increases evapotranspiration and water demand.",
-                "reduced": "There is cool temperature, which slows down evapotranspiration and reduces water demand."
-            },
-            "Humidity (%)": {
-                "increased": "There is low humidity, which increases water loss through plant transpiration.",
-                "reduced": "There is high humidity, which helps plants retain moisture and reduces water loss."
-            },
-            "Crop Stage": {
-                "increased": "The crop is in a stage such as flowering or fruiting, which generally demands more water.",
-                "reduced": "The crop is in a stage that typically requires less water compared to peak growth phases."
-            },
-            "Days Since Planting": {
-                "increased": "There are many days since planting, meaning the crop is mature and may require more water.",
-                "reduced": "There are few days since planting, meaning the crop is young and its water needs are lower."
-            }
-        }
-        return explanation_map.get(name, {}).get(direction, "This factor influenced the irrigation recommendation.")
+    
+    info = intermediates or {}
 
     for rank, i in enumerate(top_idx):
         name = feature_names[i]
@@ -66,11 +102,13 @@ def explain_prediction(input_scaled, feature_names, intermediates=None, return_t
         direction = "increased" if val > 0 else "reduced"
         sign = "+" if val > 0 else "−"
         title = f"{labels[rank]} influential factor: {name}"
-        explanation = interpret_feature(name, direction)
+
+        explanation = _humanize_explanation(name, direction, info)
+
         impact = f"{direction} irrigation probability by {sign}{abs(val):.2f}"
         explanations.append((title, explanation, impact))
 
-    #  Determine overall conclusion 
+    # Determine overall conclusion
     if intermediates and "prediction" in intermediates:
         prediction = intermediates["prediction"]  # 1 = Irrigation Required, 0 = Not Required
     else:
@@ -96,11 +134,10 @@ def explain_prediction(input_scaled, feature_names, intermediates=None, return_t
         else:
             conclusion = "Overall, the combination of crop and environmental conditions confirms irrigation is not required at this time."
 
-    # Plotting ALL features 
+    # Plotting ALL features
     sorted_idx = np.argsort(np.abs(shap_vals))[::-1]
     sorted_vals = shap_vals[sorted_idx]
     sorted_names = [feature_names[i] for i in sorted_idx]
-
     colors = ["red" if val > 0 else "green" for val in sorted_vals]
 
     plt.figure(figsize=(8, 4))

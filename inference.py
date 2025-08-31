@@ -60,7 +60,7 @@ def calculate_vpd(temperature, humidity):
     return temperature * (1 - humidity / 100)
 
 def transform_features(crop_type, crop_days, soil_moisture, temperature, humidity):
-    """Single-sample transform (used by UI); not required for batch eval below."""
+
     crop_stage = get_crop_stage(crop_type, crop_days)
     vpd = calculate_vpd(temperature, humidity)
     soil_percent = 100 * (soil_moisture - sm_min) / (sm_max - sm_min)
@@ -86,7 +86,7 @@ if __name__ == "__main__":
     df = pd.read_csv(DATA_PATH)
     model: XGBClassifier = joblib.load(MODEL_PATH)
 
-    # Reproduce training-time feature engineering (vectorized)
+    # Reproduce training-time feature engineering 
     df["CropStage"] = df.apply(lambda r: get_crop_stage(r["CropType"], r["CropDays"]), axis=1)
     df["VPD"] = df.apply(lambda r: calculate_vpd(r["temperature"], r["Humidity"]), axis=1)
     df["CropType_Code"]  = le_crop.transform(df["CropType"])
@@ -105,7 +105,7 @@ if __name__ == "__main__":
         X, y, test_size=0.20, stratify=y, random_state=42
     )
 
-    # Use the same fitted scaler from training
+  
     X_train_scaled = scaler.transform(X_train)
     X_test_scaled  = scaler.transform(X_test)
 
@@ -118,7 +118,7 @@ if __name__ == "__main__":
     print("Test Accuracy:", accuracy_score(y_test, y_pred))
     print("Report:\n", classification_report(y_test, y_pred))
 
-    # ---- Confusion Matrix (plot + save)
+    # ---- Confusion Matrix 
     cm = confusion_matrix(y_test, y_pred, labels=[0, 1])
     plt.figure(figsize=(6, 4))
     sns.heatmap(cm, annot=True, fmt='d', cmap='YlGnBu', cbar=False,
@@ -131,7 +131,7 @@ if __name__ == "__main__":
     plt.savefig(os.path.join(PLOTS_DIR, "confusion_matrix.png"), dpi=200)
     plt.show()
 
-    # ---- ROC Curve (plot + save)
+    # ---- ROC Curve 
     y_proba = model.predict_proba(X_test_scaled)[:, 1]
     fpr, tpr, _ = roc_curve(y_test, y_proba)
     roc_auc = auc(fpr, tpr)
@@ -149,8 +149,8 @@ if __name__ == "__main__":
 
     print(f"\nSaved plots to: {os.path.abspath(PLOTS_DIR)}")
 
-    # ---------------- Stratified 5-Fold CV (leakage-safe via Pipeline) ----------------
-    print("\n=== Stratified 5-Fold CV (confirmed params; leakage-safe) ===")
+    # ---------------- Stratified 5-Fold CV  ----------------
+    print("\n=== Stratified 5-Fold CV ===")
     tuned_params = dict(
         colsample_bytree=0.7,
         gamma=0.3,
@@ -167,7 +167,7 @@ if __name__ == "__main__":
     )
 
     cv_pipe = Pipeline([
-        ("scaler", StandardScaler()),      # scaler is fit inside each fold (no leakage)
+        ("scaler", StandardScaler()),     
         ("clf", XGBClassifier(**tuned_params)),
     ])
 

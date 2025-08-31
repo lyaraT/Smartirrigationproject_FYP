@@ -28,9 +28,13 @@ CROP_MAX_DAYS = {
 }
 
 def get_image_path(crop_type, crop_stage):
-    filename = f"{crop_type}_{crop_stage}.jpg".replace(" ", "_")
-    path = os.path.join("static", "images", filename)
-    return path if os.path.exists(path) else None
+    base_name = f"{crop_type}_{crop_stage}".replace(" ", "_")
+    for ext in [".jpg", ".png"]:
+        path = os.path.join("static", "images", base_name + ext)
+        if os.path.exists(path):
+            return path
+    return None
+
 
 def _format_confidence(proba_arr):
     if proba_arr is None or len(proba_arr) == 0:
@@ -172,7 +176,8 @@ with gr.Blocks(theme=gr.themes.Default(primary_hue="green", secondary_hue="gray"
     gr.HTML("""
     <style>
       .gradio-container {
-        background: linear-gradient(180deg, #F6FBF6 0%, #F9FFF9 60%, #F6FBF6 100%) !important;
+        /* AWS-like soft diagonal gradient */
+        background: linear-gradient(135deg, #d4fdd6 0%, #f8fff9 60%, #ffffff 100%) !important;
       }
 
       .gradio-container .gr-block,
@@ -231,7 +236,7 @@ with gr.Blocks(theme=gr.themes.Default(primary_hue="green", secondary_hue="gray"
       /* floating toast: fixed to viewport so user sees it anywhere */
       .floating-toast{
         position: fixed;
-        top: 14px;               /* keep at top; change to bottom:14px if you prefer */
+        top: 14px;
         left: 50%;
         transform: translateX(-50%);
         z-index: 9999;
