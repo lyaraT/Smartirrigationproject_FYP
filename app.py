@@ -29,7 +29,7 @@ CROP_MAX_DAYS = {
 
 def get_image_path(crop_type, crop_stage):
     base_name = f"{crop_type}_{crop_stage}".replace(" ", "_")
-    for ext in [".jpg", ".png"]:
+    for ext in [".jpg", ".png", ".jpeg", ".webp"]:
         path = os.path.join("static", "images", base_name + ext)
         if os.path.exists(path):
             return path
@@ -310,10 +310,10 @@ with gr.Blocks(theme=gr.themes.Default(primary_hue="green", secondary_hue="gray"
     </div>
     """)
 
-    # interactions
+    
     crop_type.change(fn=update_days_slider, inputs=[crop_type, crop_days], outputs=[crop_days])
 
-    # Analyze: keep outputs same, then show a floating toast via JS
+    
     analyze = analyze_btn.click(
         fn=predict_and_explain,
         inputs=[crop_type, crop_days, soil_moisture, temperature, humidity],
@@ -336,7 +336,7 @@ with gr.Blocks(theme=gr.themes.Default(primary_hue="green", secondary_hue="gray"
         """
     )
 
-    # Clear: keep outputs same, then show a neutral floating toast via JS
+    
     clear = clear_btn.click(
         fn=lambda: ("", None, "", None, ""),
         inputs=[],
